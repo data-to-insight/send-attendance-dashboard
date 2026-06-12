@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local generated data
+data/raw/
+data/processed/
+docs/data/benchmarks/la_by_metric/
+
+# Heavy benchmark debug / oversized outputs
+docs/data/benchmarks/la_by_metric/
+docs/data/benchmarks/story/provision_gap_by_metric/number_of_pupils.json
+docs/data/benchmarks/story/primary_need_by_metric_region/number_of_pupils/
+
+
+# MkDocs local build
+site/
+
+# Keep placeholder files
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/

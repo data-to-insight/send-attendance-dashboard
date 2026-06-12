@@ -1,0 +1,25 @@
+site_name: Region Attendance Overview
+site_description: Local authority SEND attendance, absence, suspensions and exclusions data preview
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Overview: index.md
+  - Data Explorer: explorer.md
+  - Benchmarking: benchmarking.md
+  - Sources: sources.md
+  # - Notes: notes.md
+
+markdown_extensions:
+  - tables
+  - toc:
+      permalink: true
+
+extra_css:
+  - assets/css/styles.css

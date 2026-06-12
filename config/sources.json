@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-06-03",
+  "notes": [
+    "URLs are DfE Explore Education Statistics data-catalogue CSV endpoints",
+    "Keep source keys stable in downstream processing. Add newer EES CSV endpoints as new keys rather than overwriting historic keys"
+  ],
+  "sources": [
+    {
+      "key": "attendance_sen_2025_26_autumn_term",
+      "domain": "attendance_sen",
+      "cadence": "termly",
+      "freshness_tier": "core_send_termly",
+      "source_role": "Core SEND attendance",
+      "send_disaggregated": true,
+      "current_context": false,
+      "title": "Pupil attendance between 08 September and 20 December 2025 by SEN - Autumn term",
+      "url": "https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/c4f3e40d-a038-464c-9740-062a2a1a420e/csv"
+    },
+    {
+      "key": "attendance_sen_2025_26_spring_term",
+      "domain": "attendance_sen",
+      "cadence": "termly",
+      "freshness_tier": "core_send_termly",
+      "source_role": "Core SEND attendance",
+      "send_disaggregated": true,
+      "current_context": false,
+      "title": "Pupil attendance between 05 January and 02 April 2026 by SEN - Spring term",
+      "url": "https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/d8b4d97d-0c39-4d96-91e3-6714a7d47342/csv"
+    },
+    {
+      "key": "absence_characteristics_2024_25_autumn_spring",
+      "domain": "absence_characteristics",
+      "cadence": "autumn_spring_combined",
+      "freshness_tier": "core_send_lagged",
+      "source_role": "Core SEND absence",
+      "send_disaggregated": true,
+      "current_context": false,
+      "title": "Pupil absence by pupil characteristics - autumn and spring terms combined",
+      "url": "https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/a5f750db-286a-4d63-a31b-d2a5c1d6d7e0/csv"
+    },
+    {
+      "key": "exclusions_characteristics_2024_25_spring_term",
+      "domain": "exclusions_characteristics",
+      "cadence": "termly",
+      "freshness_tier": "core_send_termly_lagged",
+      "source_role": "Core SEND exclusions",
+      "send_disaggregated": true,
+      "current_context": false,
+      "title": "Suspensions and permanent exclusions by pupil characteristic - Spring term 2024/25",
+      "url": "https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/ed60fee6-bdab-414b-82d9-337f914575de/csv"
+    },
+    {
+      "key": "attendance_current_ytd_2025_26_week20",
+      "domain": "attendance_current_ytd",
+      "cadence": "fortnightly_release_ytd",
+      "freshness_tier": "current_context_no_send",
+      "source_role": "Current attendance context",
+      "send_disaggregated": false,
+      "current_context": true,
+      "title": "Pupil attendance since week commencing 08 September 2025 - year to date, Week 20 2026",
+      "url": "https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/353375da-65aa-4c10-ba8d-961a360b584b/csv"
+    }
+  ]
+}
+ 
