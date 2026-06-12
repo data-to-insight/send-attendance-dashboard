@@ -1,17 +1,17 @@
-# DfE SEND attendance, absence, suspensions and exclusions starter
+# DfE SEND attendance, absence, suspensions and exclusions
 
-This is a small starter repo for building local authority level England datasets from DfE Explore Education Statistics CSV endpoints.
+LA level data from DfE Explore Education Stats endpoints
 
-It focuses on:
+focus:
 
 - attendance by SEN
-- absence by pupil characteristics, filtered to SEND related rows
-- suspensions and permanent exclusions by pupil characteristic, filtered to SEND related rows
+- absence by pupil characteristics, filtered to SEND related
+- suspensions and permanent exclusions by pupil characteristic, filtered to SEND related
 - SEN profile and primary need context
 
-## Why this shape
+## Shape notes
 
-The DfE sources do not all share one tidy "SEND outcome" grain. The safer pattern is to keep source-specific processed tables, then create a long measure table with shared join fields.
+DfE sources dont all share one (easier) "SEND outcome" granularity
 
 Main join spine:
 
@@ -32,54 +32,36 @@ pip install -r requirements.txt
 python scripts/build_dfe_send_attendance_exclusions.py --refresh
 ```
 
-Outputs are written to:
+Outputs to:
 
 ```text
 data/raw/
 data/processed/
 ```
 
-The most useful combined file is:
-
-```text
-data/processed/la_send_measure_long.csv
-```
 
 ## Source files
 
-The source list is in:
+Source list in:
 
 ```text
 config/sources.json
 ```
 
-Current starter sources:
+Current sources:
 
 | Source key | Domain | Notes |
 |---|---|---|
 | `attendance_sen_2024_25_academic_year` | `attendance_sen` | Full 2024/25 academic year attendance by SEN |
 | `attendance_sen_2025_26_autumn_term` | `attendance_sen` | Autumn 2025/26 attendance by SEN |
 | `attendance_sen_2025_26_spring_term` | `attendance_sen` | Spring 2025/26 attendance by SEN |
-| `absence_characteristics_2024_25` | `absence_characteristics` | Accredited absence by characteristics, filtered to SEND rows |
-| `exclusions_characteristics_2024_25_spring` | `exclusions_characteristics` | Accredited suspensions and permanent exclusions by characteristics, filtered to SEND rows |
+| `absence_characteristics_2024_25` | `absence_characteristics` | absence by characteristics, filtered to SEND rows |
+| `exclusions_characteristics_2024_25_spring` | `exclusions_characteristics` | suspensions and permanent exclusions by characteristics, filtered to SEND rows |
 | `sen_profile_year_group_need_2024_25` | `sen_profile` | SEN denominator and primary need profile |
 
-## Suggested use
+## Add new EES files
 
-Use the source-specific tables for exact publication-aligned analysis.
-
-Use `la_send_measure_long.csv` for exploratory charting, local authority dashboards and cross-source joins.
-
-For example, to compare LA level SEND attendance and suspension rates:
-
-1. Filter `source_domain = attendance_sen`, `measure_name = attendance_perc`
-2. Filter `source_domain = exclusions_characteristics`, `measure_name = susp_rate`
-3. Join on `new_la_code`, compatible `time_period` or reporting window, `education_phase`, and SEND grouping
-4. Treat `time_period` carefully, because attendance may be annual or termly while exclusions are termly
-
-## Adding newer EES files
-
-When DfE publishes a newer SEN attendance feed, add a new object in `config/sources.json` using:
+If/when DfE publishes newer SEN attendance feed, add new object in `config/sources.json` e.g.:
 
 ```json
 {
@@ -95,4 +77,4 @@ When DfE publishes a newer SEN attendance feed, add a new object in `config/sour
 }
 ```
 
-Keep older source keys rather than overwriting them, so historic outputs remain reproducible.
+Keep older source keys, so can reproduce historic outputs
