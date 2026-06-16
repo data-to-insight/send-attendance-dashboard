@@ -1,11 +1,8 @@
-## to do...
-
-I'll come back to this. 
-
+(in progress...)
 
 ## Core DfE Explore Education Statistics sources
 
-For now, this is where the data is coming from...
+where the data is coming from...
 
 | Domain | Source | URL |
 |---|---|---|
