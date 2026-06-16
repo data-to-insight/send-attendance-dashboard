@@ -14,6 +14,9 @@ docs/data/benchmarks/la_by_metric/
 docs/data/benchmarks/story/provision_gap_by_metric/number_of_pupils.json
 docs/data/benchmarks/story/primary_need_by_metric_region/number_of_pupils/
 
+# raw geo
+data/geo/*.geojson
+data/geo/*.json
 
 # MkDocs local build
 site/

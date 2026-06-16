@@ -14,6 +14,7 @@ nav:
   - Data Explorer: explorer.md
   - Benchmarking: benchmarking.md
   - Sources: sources.md
+  - LA SEND Map: la-send-map.md
   # - Notes: notes.md
 
 markdown_extensions:
