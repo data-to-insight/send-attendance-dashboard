@@ -261,3 +261,67 @@ font-size: 0.68rem;
   margin-top: .35rem;
   margin-left: 0;
 }
+
+/* start comparison SEN type comparison visual/chart */
+
+.comparison-chart {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.comparison-chart svg {
+  width: 100%;
+  min-width: 920px;
+  height: auto;
+  display: block;
+}
+
+.comparison-chart .axis-label {
+  font-size: 11px;
+  fill: #555;
+}
+
+.comparison-chart .la-label {
+  font-size: 11px;
+  fill: #333;
+}
+
+.comparison-chart .series-label {
+  font-size: 12px;
+  font-weight: 700;
+  fill: #333;
+}
+
+.comparison-chart .comparison-line {
+  stroke: #bbb;
+  stroke-width: 1;
+}
+
+.comparison-chart .dot-no-sen {
+  fill: #666;
+}
+
+.comparison-chart .dot-sen-support {
+  fill: #2b8cbe;
+}
+
+.comparison-chart .dot-ehc-plan {
+  fill: #e6550d;
+}
+
+.comparison-chart .empty-state {
+  padding: 1rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* towards provision comparison chart notes specifically */
+.comparison-note {
+  margin: 0.35rem 0 0 0;
+  max-width: 78rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.comparison-note-muted {
+  color: var(--md-default-fg-color--light);
+}

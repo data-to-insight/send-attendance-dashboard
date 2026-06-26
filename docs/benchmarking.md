@@ -88,7 +88,7 @@ raw DfE session counts still used in the explorer page(see page tab above); but 
   </label>
 </div> -->
 
-<!-- add highlight on region name as it's not obvious enough once selected -->
+<!-- add highlight on region name as otherwise not obvious enough once selected -->
 <div class="benchmark-controls benchmark-controls-region">
   <label>
     Region for LA charts and table
@@ -108,6 +108,32 @@ raw DfE session counts still used in the explorer page(see page tab above); but 
     <div class="chart-loading-mask">Updating chart...</div>
     <canvas id="la-gap-chart"></canvas>
   </div>
+</div>
+
+<!-- apply all 3 EHC/Provision & No SEN to chart -->
+<div class="benchmark-card">
+  <div class="benchmark-card-header">
+    <div>
+      <h2>LA comparison across No SEN, SEN support and EHC plan</h2>
+      <p id="provision-comparison-subtitle">
+        Compare No SEN, SEN support and EHC plan data across LAs
+          Shown ordering driven by the above 'SEND group' filter.
+      </p>
+      <p class="comparison-note">
+      Markers show selected metric value for
+      No SEN, SEN support and EHC plan children, aligned to period, phase,
+      breakdown and region filters currently set(above).
+    </p>
+      <!-- <p class="comparison-note comparison-note-muted">
+      Gap ordering calculated as selected SEND group value minus No SEN value.
+      For absence, suspensions and exclusions, positive gaps (usually) indicate higher
+      rates than No SEN. For attendance, negative gaps usually indicate lower
+      attendance than No SEN.
+    </p> -->
+    </div>
+  </div>
+
+  <div id="provision-comparison-chart" class="comparison-chart"></div>
 </div>
 
 <div class="benchmark-card">
@@ -1234,6 +1260,12 @@ raw DfE session counts still used in the explorer page(see page tab above); but 
     return rows;
   }
 
+
+
+
+
+
+
   // Table renderers
   function renderTable(rows) {
     const metric = metricFilter.value;
@@ -1354,6 +1386,336 @@ raw DfE session counts still used in the explorer page(see page tab above); but 
     `;
   }
 
+
+
+//////////
+
+
+  const provisionComparisonChart = document.getElementById("provision-comparison-chart");
+  const provisionComparisonSubtitle = document.getElementById("provision-comparison-subtitle");
+
+  function normaliseProvisionGroup(value) {
+    const text = String(value || "").trim().toLowerCase();
+
+    if (
+      text === "ehc plan" ||
+      text.includes("statement or ehc") ||
+      text.includes("statement/ehc") ||
+      text.includes("education health and care") ||
+      text.includes("education, health and care")
+    ) {
+      return "EHC plan";
+    }
+
+    if (text === "sen support" || text.includes("sen support")) {
+      return "SEN support";
+    }
+
+    if (
+      text === "no sen" ||
+      text.includes("no identified sen") ||
+      text.includes("without sen")
+    ) {
+      return "No SEN";
+    }
+
+    return String(value || "").trim();
+  }
+
+  function currentSendGroupForOrdering() {
+    return normaliseProvisionGroup(sendFilter?.value || "EHC plan");
+  }
+
+
+  function currentProvisionComparisonOrder() {
+    const selectedGroup = currentSendGroupForOrdering();
+
+    if (selectedGroup === "SEN support") {
+      return {
+        key: "sen_support_gap",
+        label: "SEN support gap to No SEN"
+      };
+    }
+
+    if (selectedGroup === "No SEN") {
+      return {
+        key: "no_sen_value",
+        label: "No SEN value"
+      };
+    }
+
+    return {
+      key: "ehc_gap",
+      label: "EHC plan gap to No SEN"
+    };
+  }
+
+  // 
+  function provisionComparisonSourceRows() {
+    let rows = baseFilterRows(metricRows);
+    rows = filterRowsToSelectedRegion(rows);
+    return rows;
+  }
+
+  function buildProvisionComparisonRows(rows) {
+    const grouped = new Map();
+
+    for (const row of rows) {
+      const group = normaliseProvisionGroup(row.send_category);
+
+      if (!["No SEN", "SEN support", "EHC plan"].includes(group)) {
+        continue;
+      }
+
+      const laCode = row.new_la_code || row.la_name;
+
+      if (!laCode) {
+        continue;
+      }
+
+      const key = [
+        laCode,
+        row.la_name || "",
+        row.region_code || "",
+        row.time_period || "",
+        row.time_identifier || "",
+        row.academic_year || "",
+        row.education_phase || "",
+        row.phase_type_grouping || "",
+        row.metric || ""
+      ].join("||");
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          new_la_code: row.new_la_code,
+          la_name: row.la_name || laCode,
+          region_code: row.region_code,
+          region_name: row.region_name,
+          time_period: row.time_period,
+          time_identifier: row.time_identifier,
+          academic_year: row.academic_year,
+          education_phase: row.education_phase,
+          phase_type_grouping: row.phase_type_grouping,
+          metric: row.metric,
+          metric_label: row.metric_label || row.metric,
+          no_sen_value: null,
+          sen_support_value: null,
+          ehc_plan_value: null
+        });
+      }
+
+      const item = grouped.get(key);
+      const value = Number(row.value);
+
+      if (!Number.isFinite(value)) {
+        continue;
+      }
+
+      if (group === "No SEN") {
+        item.no_sen_value = value;
+      }
+
+      if (group === "SEN support") {
+        item.sen_support_value = value;
+      }
+
+      if (group === "EHC plan") {
+        item.ehc_plan_value = value;
+      }
+    }
+
+    return [...grouped.values()]
+      .map(row => ({
+        ...row,
+        sen_support_gap: (
+          Number.isFinite(row.sen_support_value) && Number.isFinite(row.no_sen_value)
+            ? row.sen_support_value - row.no_sen_value
+            : null
+        ),
+        ehc_gap: (
+          Number.isFinite(row.ehc_plan_value) && Number.isFinite(row.no_sen_value)
+            ? row.ehc_plan_value - row.no_sen_value
+            : null
+        )
+      }))
+      .filter(row =>
+        Number.isFinite(row.no_sen_value) ||
+        Number.isFinite(row.sen_support_value) ||
+        Number.isFinite(row.ehc_plan_value)
+      );
+  }
+
+  function sortProvisionComparisonRows(rows, orderKey) {
+    return rows.slice().sort((a, b) => {
+      const av = Number(a[orderKey]);
+      const bv = Number(b[orderKey]);
+
+      if (!Number.isFinite(av) && !Number.isFinite(bv)) return 0;
+      if (!Number.isFinite(av)) return 1;
+      if (!Number.isFinite(bv)) return -1;
+
+      return bv - av;
+    });
+  }
+
+  function renderProvisionComparisonChart() {
+    if (!provisionComparisonChart) {
+      return;
+    }
+
+    const order = currentProvisionComparisonOrder();
+
+    const sourceRows = provisionComparisonSourceRows();
+    const comparisonRows = sortProvisionComparisonRows(
+      buildProvisionComparisonRows(sourceRows),
+      order.key
+    ).slice(0, 30);
+
+
+    if (provisionComparisonSubtitle) {
+      provisionComparisonSubtitle.innerHTML = `
+        Compare No SEN, SEN support and EHC plan values for each LA.
+        Ordered by <strong>${escapeHtml(order.label)}</strong>, using the existing 'SEND group' filter.
+      `;
+    }
+
+
+    if (!comparisonRows.length) {
+      provisionComparisonChart.innerHTML = `
+        <div class="empty-state">
+          No comparison rows are available for the current metric and filters.
+        </div>
+      `;
+      return;
+    }
+
+    const values = [];
+
+    for (const row of comparisonRows) {
+      for (const key of ["no_sen_value", "sen_support_value", "ehc_plan_value"]) {
+        const value = Number(row[key]);
+        if (Number.isFinite(value)) {
+          values.push(value);
+        }
+      }
+    }
+
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const range = maxValue - minValue || 1;
+
+    const width = 980;
+    const left = 210;
+    const right = 30;
+    const top = 82;
+    const rowHeight = 26;
+    const height = top + comparisonRows.length * rowHeight + 45;
+    const plotWidth = width - left - right;
+
+    function x(value) {
+      if (!Number.isFinite(Number(value))) {
+        return null;
+      }
+
+      return left + ((Number(value) - minValue) / range) * plotWidth;
+    }
+
+    function y(index) {
+      return top + index * rowHeight;
+    }
+
+    // show if data vals are % or rate to make it clearer in chart
+    function fmt(value) {
+      if (!Number.isFinite(Number(value))) {
+        return "";
+      }
+
+      const formatted = Number(value).toLocaleString(undefined, {
+        maximumFractionDigits: 2
+      });
+
+      if (metricType(metricFilter.value) === "percent") {
+        return `${formatted}%`;
+      }
+
+      return formatted;
+    }
+
+
+    const rowsSvg = comparisonRows.map((row, index) => {
+      const yPos = y(index);
+      const noSenX = x(row.no_sen_value);
+      const senSupportX = x(row.sen_support_value);
+      const ehcX = x(row.ehc_plan_value);
+
+      const lineXs = [noSenX, senSupportX, ehcX].filter(v => v !== null);
+      const minX = lineXs.length ? Math.min(...lineXs) : null;
+      const maxX = lineXs.length ? Math.max(...lineXs) : null;
+
+      return `
+        <g>
+          <text class="la-label" x="0" y="${yPos + 4}">
+            ${escapeHtml(row.la_name)}
+          </text>
+
+          ${
+            lineXs.length > 1
+              ? `<line class="comparison-line" x1="${minX}" x2="${maxX}" y1="${yPos}" y2="${yPos}" />`
+              : ""
+          }
+
+          ${
+            noSenX !== null
+              ? `<circle class="dot-no-sen" cx="${noSenX}" cy="${yPos}" r="4">
+                  <title>${escapeHtml(row.la_name)} No SEN: ${fmt(row.no_sen_value)}</title>
+                </circle>`
+              : ""
+          }
+
+          ${
+            senSupportX !== null
+              ? `<circle class="dot-sen-support" cx="${senSupportX}" cy="${yPos}" r="4">
+                  <title>${escapeHtml(row.la_name)} SEN support: ${fmt(row.sen_support_value)}. Gap to No SEN: ${fmt(row.sen_support_gap)}</title>
+                </circle>`
+              : ""
+          }
+
+          ${
+            ehcX !== null
+              ? `<circle class="dot-ehc-plan" cx="${ehcX}" cy="${yPos}" r="4">
+                  <title>${escapeHtml(row.la_name)} EHC plan: ${fmt(row.ehc_plan_value)}. Gap to No SEN: ${fmt(row.ehc_gap)}</title>
+                </circle>`
+              : ""
+          }
+        </g>
+      `;
+    }).join("");
+
+  const valueScaleLabel = metricValueLabel(metricFilter.value);
+
+  provisionComparisonChart.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" role="img">
+      <text class="series-label dot-no-sen" x="${left}" y="18">● No SEN</text>
+      <text class="series-label dot-sen-support" x="${left + 95}" y="18">● SEN support</text>
+      <text class="series-label dot-ehc-plan" x="${left + 225}" y="18">● EHC plan</text>
+
+      <text class="axis-label" x="${left}" y="44">
+        Value scale: ${escapeHtml(valueScaleLabel)}
+      </text>
+
+      <text class="axis-label" x="${left}" y="64">${fmt(minValue)}</text>
+      <text class="axis-label" x="${width - right - 70}" y="64">${fmt(maxValue)}</text>
+
+      <line x1="${left}" x2="${width - right}" y1="70" y2="70" stroke="#ccc" />
+
+      ${rowsSvg}
+    </svg>
+  `;
+  }
+
+
+//////////
+
   function currentSliceLabel() {
     const parts = [];
 
@@ -1393,21 +1755,23 @@ raw DfE session counts still used in the explorer page(see page tab above); but 
 
       if (thisRender !== renderToken) return;
 
-      refreshPrimaryNeedFilter();
+    refreshPrimaryNeedFilter();
 
-      const regionGapRows = renderRegionGapChart() || [];
-      const laGapRows = renderLaGapChart() || [];
-      renderLaBaselineChart();
-      renderTable(laGapRows);
+    const regionGapRows = renderRegionGapChart() || [];
+    const laGapRows = renderLaGapChart() || [];
 
-      const primaryNeedChartRows = renderPrimaryNeedLaChart() || [];
-      renderPrimaryNeedTable(primaryNeedChartRows);
+    renderProvisionComparisonChart();
+    renderLaBaselineChart();
+    renderTable(laGapRows);
 
-      setStatus(
-        `Loaded ${metricRows.length.toLocaleString()} provision rows for ` +
-        `<strong>${escapeHtml(metricLabel(metric))}</strong>.` +
-        (primaryNeedRows.length ? ` Loaded ${primaryNeedRows.length.toLocaleString()} primary need rows for ${escapeHtml(selectedRegionLabel())}.` : "")
-      );
+    const primaryNeedChartRows = renderPrimaryNeedLaChart() || [];
+    renderPrimaryNeedTable(primaryNeedChartRows);
+
+    setStatus(
+      `Loaded ${metricRows.length.toLocaleString()} provision rows for ` +
+      `<strong>${escapeHtml(metricLabel(metric))}</strong>.` +
+      (primaryNeedRows.length ? ` Loaded ${primaryNeedRows.length.toLocaleString()} primary need rows for ${escapeHtml(selectedRegionLabel())}.` : "")
+    );
     } catch (err) {
       console.error(err);
       clearCharts();
