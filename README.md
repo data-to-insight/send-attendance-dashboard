@@ -61,7 +61,7 @@ Current sources:
 
 ## Add new EES files
 
-If/when DfE publishes newer SEN attendance feed, add new object in `config/sources.json` e.g.:
+If/when DfE publishes newer SEN attendance feed add new object in `config/sources.json` e.g.:
 
 ```json
 {

@@ -17,3 +17,7 @@ print("long_record_count:", data.get("long_record_count"))
 print("wide_records:", len(data.get("wide_records", [])))
 print("wide_measure_columns:", data.get("wide_measure_columns", []))
 PY
+
+
+
+python3 -m mkdocs serve
