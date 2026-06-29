@@ -7,6 +7,7 @@ title: Benchmarking
 >Compare SEND attendance|absence|inclusion measures against No SEN baseline  
 >Choose metric and region to see how selected SEND group, eg `EHC plan` or `SEN support` with those recorded as `No SEN`
 
+N.b - Work here very much in flex/dev/alpha. I'm trialing ideas around the existing data, but also investigating the underlying data towards this. Take all with pinch of salt for now. 
 
 Core calc is:
 
@@ -1575,7 +1576,7 @@ raw DfE session counts still used in the explorer page(see page tab above); but 
     if (provisionComparisonSubtitle) {
       provisionComparisonSubtitle.innerHTML = `
         Compare No SEN, SEN support and EHC plan values for each LA.
-        Ordered by <strong>${escapeHtml(order.label)}</strong>, using the existing 'SEND group' filter.
+        Ordered by <strong>${escapeHtml(order.label)}</strong>, from the 'SEND group' filter(above)
       `;
     }
 
